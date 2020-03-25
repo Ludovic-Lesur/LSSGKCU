@@ -6,9 +6,12 @@
  */
 
 #include "keyboard.h"
+#include "lsmcu.h"
 #include "serial.h"
 #include "sound.h"
 #include "stdio.h"
+#include "time.h"
+#include "zvm.h"
 
 /* MAIN FUNCTION.
  * @param:	None.
@@ -20,19 +23,17 @@ int main (void) {
 	printf("*** Locomotive Simulator Sound Game and KVB Control Unit (LSSGKCU) ***\n");
 	printf("**********************************************************************\n\n");
 	fflush(stdout);
-	// Init all modules.
+	// Init time.
+	TIME_Init();
+	// Init sounds.
 	SOUND_FmodSystemInit();
-	HANDLE lsmcu;
-	SERIAL_Open(&lsmcu, "COM3", 9600);
-	// Sound test.
-	SOUND_Context zba;
-	SOUND_Create(&zba, "C:/Users/Ludovic/Documents/Eclipse/LSSGKCU/wav/zbaTurnOn.wav", 1.0);
-	SOUND_Play(&zba);
-	// Keyboard test.
-	KEYBOARD_Write(KEY_A);
-	// Serial port test.
+	ZVM_Init();
+	// Init serial link.
+	LSMCU_Init("COM3");
+	// Main loop.
 	while (1) {
-		SERIAL_Read(&lsmcu);
+		LSMCU_Task();
+		ZVM_Task();
 	}
 	printf("End of program");
 

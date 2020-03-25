@@ -9,10 +9,18 @@
 
 #include "fmod.h"
 #include "stdio.h"
+#include "time.h"
 
-/*** Sound local global variables ***/
+/*** SOUND local macros ***/
 
-static FMOD_SYSTEM* fmodSystem;
+#define SOUND_FMOD_NUMBER_OF_CHANNELS	32
+//#define SOUND_LOG
+
+/*** SOUND local global variables ***/
+
+static FMOD_SYSTEM* sound_fmod_system;
+unsigned int m = 0;
+unsigned int n = 0;
 
 /*** SOUND functions ***/
 
@@ -21,8 +29,8 @@ static FMOD_SYSTEM* fmodSystem;
  * @return:	None.
  */
 void SOUND_FmodSystemInit() {
-	FMOD_System_Create(&fmodSystem);
-	FMOD_System_Init(fmodSystem, 32, FMOD_INIT_NORMAL, NULL);
+	FMOD_System_Create(&sound_fmod_system);
+	FMOD_System_Init(sound_fmod_system, SOUND_FMOD_NUMBER_OF_CHANNELS, FMOD_INIT_NORMAL, (void*) 0);
 }
 
 /* CREATE AN FMOD SOUND.
@@ -31,16 +39,19 @@ void SOUND_FmodSystemInit() {
  * @param maxVolume:	Maximum normalized volume of the sound. Should be between 0.0 and 1.0.
  * @return : none.
  */
-void SOUND_Create(SOUND_Context* sound_ctx, const char* audio_file_path, float maximum_volume) {
+void SOUND_Init(SOUND_Context* sound_ctx, const char* audio_file_path, float maximum_volume) {
 	// Structure initialisation.
-	sound_ctx -> sound_maximum_volume = maximum_volume;
+	FMOD_System_CreateSound(sound_fmod_system, audio_file_path, FMOD_SOFTWARE | FMOD_2D | FMOD_CREATESTREAM, 0, &(sound_ctx -> sound_fmod_sound));
+	FMOD_Sound_GetLength((sound_ctx -> sound_fmod_sound), &(sound_ctx -> sound_length_ms), FMOD_TIMEUNIT_MS);
 	sound_ctx -> sound_current_volume = 0.0;
-	sound_ctx -> sound_length_ms = 0;
-	sound_ctx -> sound_position_ms = 0;
-	sound_ctx -> sound_is_playing = 0;
-	FMOD_System_CreateSound(fmodSystem, audio_file_path, FMOD_SOFTWARE | FMOD_2D | FMOD_CREATESTREAM, 0, &((*sound_ctx).sound_fmod_sound));
-	FMOD_Sound_GetLength((*sound_ctx).sound_fmod_sound, &((*sound_ctx).sound_length_ms), FMOD_TIMEUNIT_MS);
+	SOUND_SetVolume(sound_ctx, 0.0);
+	sound_ctx -> sound_maximum_volume = maximum_volume;
+	sound_ctx -> sound_fade_start_volume = 0.0;
+	sound_ctx -> sound_fade_start_position_ms = 0;
+#ifdef SOUND_LOG
 	printf("SOUND *** Audio file %s successfully opened.\n", audio_file_path);
+	fflush(stdout);
+#endif
 }
 
 /* PLAY A SOUND.
@@ -48,5 +59,143 @@ void SOUND_Create(SOUND_Context* sound_ctx, const char* audio_file_path, float m
  * @return: 			None.
  */
 void SOUND_Play(SOUND_Context* sound_ctx) {
-	FMOD_System_PlaySound(fmodSystem, FMOD_CHANNEL_FREE, ((*sound_ctx).sound_fmod_sound), 0, &((*sound_ctx).sound_fmod_channel));
+	FMOD_System_PlaySound(sound_fmod_system, FMOD_CHANNEL_FREE, (sound_ctx -> sound_fmod_sound), 0, &(sound_ctx -> sound_fmod_channel));
+}
+
+/* STOP A SOUND.
+ * @param sound_ctx:	Sound to play.
+ * @return: 			None.
+ */
+void SOUND_Stop(SOUND_Context* sound_ctx) {
+	FMOD_Channel_Stop(sound_ctx -> sound_fmod_channel);
+}
+
+/* SET THE VOLUME OF A SOUND.
+ * @param sound_ctx:	Sound to control.
+ * @param new_volume: 	New volume of the sound.
+ * @return:				None.
+ */
+void SOUND_SetVolume(SOUND_Context* sound_ctx, float new_volume) {
+	FMOD_Channel_SetVolume((sound_ctx -> sound_fmod_channel), (new_volume * (sound_ctx -> sound_maximum_volume)));
+	sound_ctx -> sound_current_volume = new_volume;
+}
+
+/* GET THE DURATION OF A SOUND.
+ * @param sound_ctx:	Sound to analyse.
+ * @return length_ms: 	Sound duration in ms.
+ */
+unsigned int SOUND_GetLengthMs(SOUND_Context* sound_ctx) {
+	return (sound_ctx -> sound_length_ms);
+}
+
+/* GET THE CURRENT POSITION IN A SOUND.
+ * @param sound_ctx:	Sound to analyse.
+ * @return position_ms:	Current reading position in ms.
+ */
+unsigned int SOUND_GetPositionMs(SOUND_Context* sound_ctx) {
+	unsigned int position_ms = 0;
+	FMOD_Channel_GetPosition((sound_ctx -> sound_fmod_channel), &position_ms, FMOD_TIMEUNIT_MS);
+	return position_ms;
+}
+
+/* SET THE CURRENT POSITION OF A SOUND.
+ * @param sound_ctx:		Sound to control.
+ * @param new_position_ms:	New reading position in ms.
+ * @return: 				None.
+ */
+void SOUND_SetPosition(SOUND_Context* sound_ctx, unsigned int new_position_ms) {
+	FMOD_Channel_SetPosition((sound_ctx -> sound_fmod_channel), new_position_ms, FMOD_TIMEUNIT_MS);
+}
+
+/* CHECK IS A SOUND IS CURRENTLY PLAYING.
+ * @param sound_ctx:	Sound to analyse.
+ * @return is_playing:	Non-zero value if the sound is currently playing, 0 otherwise.
+ */
+FMOD_BOOL SOUND_IsPlaying(SOUND_Context* sound_ctx) {
+	FMOD_BOOL is_playing = 0;
+	FMOD_Channel_IsPlaying((sound_ctx -> sound_fmod_channel), &is_playing);
+	return is_playing;
+}
+
+/* SAVE FADE EFFECT PARAMETERS.
+ * @param sound_ctx:	Sound to control.
+ * @return:				None.
+ */
+void SOUND_SaveFadeParameters(SOUND_Context* sound_ctx) {
+	sound_ctx -> sound_fade_start_position_ms = SOUND_GetPositionMs(sound_ctx);
+	sound_ctx -> sound_fade_start_volume = (sound_ctx -> sound_current_volume);
+}
+
+/* PERFORM FADE-IN EFFECT.
+ * @param sound_ctx:		Sound to control.
+ * @param fade_duration_ms:	Fade effect duration in ms.
+ * @return fade_end			'1' if the fade effect is finished, '0' otherwise.
+ */
+unsigned char SOUND_FadeIn(SOUND_Context* sound_ctx, unsigned int fade_duration_ms) {
+	float fade_in_volume = (sound_ctx -> sound_current_volume);
+	unsigned char fade_end = 0;
+	// Ensure sound is playing and current position is greater or equal the start position.
+	if ((SOUND_GetPositionMs(sound_ctx) >= (sound_ctx -> sound_fade_start_position_ms)) && (SOUND_IsPlaying(sound_ctx) > 0)) {
+		if ((SOUND_GetPositionMs(sound_ctx) >= ((sound_ctx -> sound_fade_start_position_ms) + fade_duration_ms)) || (SOUND_GetPositionMs(sound_ctx) >= (sound_ctx -> sound_length_ms))) {
+			// Clamp zone.
+			fade_in_volume = 1.0;
+			fade_end = 1;
+		}
+		else {
+			// Fade zone: apply linear equation.
+			fade_in_volume = (float) ((sound_ctx -> sound_fade_start_volume) + ((1.0 - (sound_ctx -> sound_fade_start_volume)) * ((float) (SOUND_GetPositionMs(sound_ctx)) - (float) (sound_ctx -> sound_fade_start_position_ms))) / ((float) fade_duration_ms));
+		}
+		// Apply new volume.
+		SOUND_SetVolume(sound_ctx, fade_in_volume);
+#ifdef SOUND_LOG
+		if (TIME_GetMs() > m) {
+			m = TIME_GetMs() + 100;
+			printf("fade_in_volume=%f\n", fade_in_volume);
+			fflush(stdout);
+		}
+#endif
+	}
+	else {
+		// Error.
+		fade_end = 1;
+	}
+	// Return end flag.
+	return fade_end;
+}
+
+/* PERFORM FADE-OUT EFFECT.
+ * @param sound_ctx:		Sound to control.
+ * @param fade_duration_ms:	Fade effect duration in ms.
+ * @return fade_end			'1' if the fade effect is finished, '0' otherwise.
+ */
+unsigned char SOUND_FadeOut(SOUND_Context* sound_ctx, unsigned int fade_duration_ms) {
+	float fade_out_volume = (sound_ctx -> sound_current_volume);
+	unsigned char fade_end = 0;
+	// Ensure sound is playing and current position is greater or equal the start position.
+	if ((SOUND_GetPositionMs(sound_ctx) >= (sound_ctx -> sound_fade_start_position_ms)) && (SOUND_IsPlaying(sound_ctx) > 0)) {
+		if ((SOUND_GetPositionMs(sound_ctx) >= ((sound_ctx -> sound_fade_start_position_ms) + fade_duration_ms)) || (SOUND_GetPositionMs(sound_ctx) >= (sound_ctx -> sound_length_ms))) {
+			// Clamp zone.
+			fade_out_volume = 0.0;
+			fade_end = 1;
+		}
+		else {
+			// Fade zone: apply linear equation.
+			fade_out_volume = (float) ((sound_ctx -> sound_fade_start_volume) - ((sound_ctx -> sound_fade_start_volume) * ((float) (SOUND_GetPositionMs(sound_ctx)) - (float) (sound_ctx -> sound_fade_start_position_ms))) / ((float) fade_duration_ms));
+		}
+		// Apply new volume.
+		SOUND_SetVolume(sound_ctx, fade_out_volume);
+#ifdef SOUND_LOG
+		if (TIME_GetMs() > n) {
+			n = TIME_GetMs() + 100;
+			printf("fade_out_volume=%f\n", fade_out_volume);
+			fflush(stdout);
+		}
+#endif
+	}
+	else {
+		// Error.
+		fade_end = 1;
+	}
+	// Return end flag.
+	return fade_end;
 }

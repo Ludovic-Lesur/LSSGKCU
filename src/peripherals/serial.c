@@ -11,9 +11,10 @@
 
 /*** SERIAL macros ***/
 
+#define SERIAL_PORT_TIMEOUT_MS			10
 #define SERIAL_PORT_NAME_MAX_LENGTH		5 // Maximum length = "COMxx" = 5.
 #define SERIAL_PATH_HEADER_LENGTH 		4 // Length = "\\.\" = 4.
-#define SERIAL_LOG
+//#define SERIAL_LOG
 
 /*** SERIAL functions ***/
 
@@ -55,6 +56,14 @@ void SERIAL_Open(HANDLE* handle, char port[], unsigned int baud_rate) {
 		config.BaudRate = baud_rate;
 		config.ByteSize = 8;
 		SetCommState((*handle), &config);
+		// Configure timeouts.
+		COMMTIMEOUTS timeouts = {0};
+		timeouts.ReadIntervalTimeout = SERIAL_PORT_TIMEOUT_MS;
+		timeouts.ReadTotalTimeoutConstant = SERIAL_PORT_TIMEOUT_MS;
+		timeouts.ReadTotalTimeoutMultiplier = SERIAL_PORT_TIMEOUT_MS;
+		timeouts.WriteTotalTimeoutConstant = SERIAL_PORT_TIMEOUT_MS;
+		timeouts.WriteTotalTimeoutMultiplier = SERIAL_PORT_TIMEOUT_MS;
+		SetCommTimeouts((*handle), &timeouts);
 #ifdef SERIAL_LOG
 		if ((*handle) == INVALID_HANDLE_VALUE) {
 			printf("failed.\n");
