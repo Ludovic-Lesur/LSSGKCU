@@ -14,7 +14,7 @@
 
 void SERIAL_Open(HANDLE* handle, char port[], unsigned int baud_rate);
 BOOL SERIAL_Write(HANDLE* handle, unsigned char tx_byte);
-unsigned char SERIAL_Read(HANDLE* handle);
+BOOL SERIAL_Read(HANDLE* handle, unsigned char* rx_byte);
 void SERIAL_Flush(HANDLE* handle);
 void SERIAL_Close(HANDLE* handle);
 

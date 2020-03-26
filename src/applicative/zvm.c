@@ -50,10 +50,10 @@ static ZVM_Context zvm_ctx;
  */
 void ZVM_Init(void) {
 	// Init sounds.
-	SOUND_Init(&(zvm_ctx.zvm_sound_turnon), "C:/Users/Ludovic/Documents/Eclipse/LSSGKCU/wav/ventilateurs_allumage.wav", ZVM_MAXIMUM_VOLUME);
-	SOUND_Init(&(zvm_ctx.zvm_sound_on1), "C:/Users/Ludovic/Documents/Eclipse/LSSGKCU/wav/ventilateurs_marche.wav", ZVM_MAXIMUM_VOLUME);
-	SOUND_Init(&(zvm_ctx.zvm_sound_on2), "C:/Users/Ludovic/Documents/Eclipse/LSSGKCU/wav/ventilateurs_marche.wav", ZVM_MAXIMUM_VOLUME);
-	SOUND_Init(&(zvm_ctx.zvm_sound_turnoff), "C:/Users/Ludovic/Documents/Eclipse/LSSGKCU/wav/ventilateurs_extinction.wav", ZVM_MAXIMUM_VOLUME);
+	SOUND_Init(&(zvm_ctx.zvm_sound_turnon), "ventilateurs_allumage.wav", ZVM_MAXIMUM_VOLUME);
+	SOUND_Init(&(zvm_ctx.zvm_sound_on1), "ventilateurs_marche.wav", ZVM_MAXIMUM_VOLUME);
+	SOUND_Init(&(zvm_ctx.zvm_sound_on2), "ventilateurs_marche.wav", ZVM_MAXIMUM_VOLUME);
+	SOUND_Init(&(zvm_ctx.zvm_sound_turnoff), "ventilateurs_extinction.wav", ZVM_MAXIMUM_VOLUME);
 	// Init state machine.
 	zvm_ctx.zvm_on = 0;
 	zvm_ctx.zvm_state = ZVM_STATE_OFF;

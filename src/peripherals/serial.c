@@ -44,9 +44,7 @@ void SERIAL_Open(HANDLE* handle, char port[], unsigned int baud_rate) {
 		for (; i<(SERIAL_PORT_NAME_MAX_LENGTH + 1) ; i++) {
 			port_name[SERIAL_PATH_HEADER_LENGTH + i] = '\0';
 		}
-#ifdef SERIAL_LOG
 		printf("SERIAL *** Opening port %s: ", port);
-#endif
 		// Create handle.
 		(*handle) = CreateFile(port_name, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
 		// Configure serial port settings.
@@ -64,27 +62,23 @@ void SERIAL_Open(HANDLE* handle, char port[], unsigned int baud_rate) {
 		timeouts.WriteTotalTimeoutConstant = SERIAL_PORT_TIMEOUT_MS;
 		timeouts.WriteTotalTimeoutMultiplier = SERIAL_PORT_TIMEOUT_MS;
 		SetCommTimeouts((*handle), &timeouts);
-#ifdef SERIAL_LOG
 		if ((*handle) == INVALID_HANDLE_VALUE) {
-			printf("failed.\n");
+			printf("Error.\n");
 		}
 		else {
-			printf("success.\n");
+			printf("OK.\n");
 		}
 	}
 	else {
-		printf("failed (null handle pointer).\n");
+		printf("Error (null handle pointer).\n");
 	}
 	fflush(stdout);
-#else
-	}
-#endif
 }
 
 /* SEND DATA TO SERIAL PORT.
  * @param handle:	Pointer to handle.
  * @param tx_byte:	Byte to send.
- * @return result: 	0 if sending failed, non-zero value otherwise.
+ * @return result: 	0 if function failed, non-zero value otherwise.
  */
 BOOL SERIAL_Write(HANDLE* handle, unsigned char tx_byte) {
 	BOOL result = WriteFile((*handle), &tx_byte, 1, NULL, NULL);
@@ -102,20 +96,21 @@ BOOL SERIAL_Write(HANDLE* handle, unsigned char tx_byte) {
 
 /* READ DATA FROM SERIAL PORT.
  * @param handle:	Pointer to handle.
- * @return rx_byte:	Byte read from serial port.
+ * @param rx_byte:	Pointer to byte that will contain received data.
+ * @return result:	0 if function failed, non-zero value otherwise.
  */
-unsigned char SERIAL_Read(HANDLE* handle) {
-	unsigned char rx_byte = 0;
+BOOL SERIAL_Read(HANDLE* handle, unsigned char* rx_byte) {
+	BOOL result = 0;
 	if (handle != NULL) {
 		if ((*handle) != INVALID_HANDLE_VALUE) {
-			ReadFile((*handle), &rx_byte, 1, NULL, NULL);
+			result = ReadFile((*handle), rx_byte, 1, NULL, NULL);
 #ifdef SERIAL_LOG
 			printf("SERIAL *** Read byte 0x%x.\n", rx_byte);
 			fflush(stdout);
 #endif
 		}
 	}
-	return rx_byte;
+	return result;
 }
 
 /* CLEAN SERIAL PORT.

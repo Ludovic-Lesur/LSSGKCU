@@ -9,18 +9,23 @@
 
 #include "fmod.h"
 #include "stdio.h"
+#include "string.h"
 #include "time.h"
 
 /*** SOUND local macros ***/
 
-#define SOUND_FMOD_NUMBER_OF_CHANNELS	32
+#define SOUND_FMOD_NUMBER_OF_CHANNELS			32
+#define SOUND_AUDIO_FILES_FOLDER_PATH			"C:/Users/Ludovic/Documents/Eclipse/LSSGKCU/wav/"
+#define SOUND_AUDIO_FILE_NAME_MAXIMUM_LENGTH	100
 //#define SOUND_LOG
 
 /*** SOUND local global variables ***/
 
 static FMOD_SYSTEM* sound_fmod_system;
-unsigned int m = 0;
-unsigned int n = 0;
+#ifdef SOUND_LOG
+unsigned int a = 0;
+unsigned int b = 0;
+#endif
 
 /*** SOUND functions ***/
 
@@ -34,24 +39,31 @@ void SOUND_FmodSystemInit() {
 }
 
 /* CREATE AN FMOD SOUND.
- * @param sound_ctx:	Pointer to sound structure.
- * @param wavPath:		Absolute or relative path of the sound file.
- * @param maxVolume:	Maximum normalized volume of the sound. Should be between 0.0 and 1.0.
- * @return : none.
+ * @param sound_ctx:		Pointer to sound structure.
+ * @param audio_file_name:	Audio file full name ("x.wav").
+ * @param maximum_volume:	Maximum normalized volume of the sound (0.0 to 1.0), see mixer.h.
+ * @return:					None.
  */
-void SOUND_Init(SOUND_Context* sound_ctx, const char* audio_file_path, float maximum_volume) {
+void SOUND_Init(SOUND_Context* sound_ctx, const char* audio_file_name, float maximum_volume) {
+	// Create full name.
+	char audio_file_full_name[SOUND_AUDIO_FILE_NAME_MAXIMUM_LENGTH] = SOUND_AUDIO_FILES_FOLDER_PATH;
+	strcat(audio_file_full_name, audio_file_name);
 	// Structure initialisation.
-	FMOD_System_CreateSound(sound_fmod_system, audio_file_path, FMOD_SOFTWARE | FMOD_2D | FMOD_CREATESTREAM, 0, &(sound_ctx -> sound_fmod_sound));
+	FMOD_RESULT fmod_result = FMOD_System_CreateSound(sound_fmod_system, audio_file_full_name, FMOD_SOFTWARE | FMOD_2D | FMOD_CREATESTREAM, 0, &(sound_ctx -> sound_fmod_sound));
 	FMOD_Sound_GetLength((sound_ctx -> sound_fmod_sound), &(sound_ctx -> sound_length_ms), FMOD_TIMEUNIT_MS);
 	sound_ctx -> sound_current_volume = 0.0;
 	SOUND_SetVolume(sound_ctx, 0.0);
 	sound_ctx -> sound_maximum_volume = maximum_volume;
 	sound_ctx -> sound_fade_start_volume = 0.0;
 	sound_ctx -> sound_fade_start_position_ms = 0;
-#ifdef SOUND_LOG
-	printf("SOUND *** Audio file %s successfully opened.\n", audio_file_path);
+	printf("SOUND *** Opening audio file %s: ", audio_file_name);
+	if (fmod_result == FMOD_OK) {
+		printf("OK.\n");
+	}
+	else {
+		printf("Error.\n");
+	}
 	fflush(stdout);
-#endif
 }
 
 /* PLAY A SOUND.
@@ -148,8 +160,8 @@ unsigned char SOUND_FadeIn(SOUND_Context* sound_ctx, unsigned int fade_duration_
 		// Apply new volume.
 		SOUND_SetVolume(sound_ctx, fade_in_volume);
 #ifdef SOUND_LOG
-		if (TIME_GetMs() > m) {
-			m = TIME_GetMs() + 100;
+		if (TIME_GetMs() > a) {
+			a = TIME_GetMs() + 100;
 			printf("fade_in_volume=%f\n", fade_in_volume);
 			fflush(stdout);
 		}
@@ -185,8 +197,8 @@ unsigned char SOUND_FadeOut(SOUND_Context* sound_ctx, unsigned int fade_duration
 		// Apply new volume.
 		SOUND_SetVolume(sound_ctx, fade_out_volume);
 #ifdef SOUND_LOG
-		if (TIME_GetMs() > n) {
-			n = TIME_GetMs() + 100;
+		if (TIME_GetMs() > b) {
+			b = TIME_GetMs() + 100;
 			printf("fade_out_volume=%f\n", fade_out_volume);
 			fflush(stdout);
 		}
