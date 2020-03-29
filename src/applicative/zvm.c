@@ -1,8 +1,8 @@
 /*
  * zvm.c
  *
- *  Created on: 25 mars 2020
- *      Author: Ludovic
+ *  Created on: 25 mar. 2020
+ *      Author: Ludo
  */
 
 #include "zvm.h"
@@ -50,10 +50,10 @@ static ZVM_Context zvm_ctx;
  */
 void ZVM_Init(void) {
 	// Init sounds.
-	SOUND_Init(&(zvm_ctx.zvm_sound_turnon), "ventilateurs_allumage.wav", ZVM_MAXIMUM_VOLUME);
-	SOUND_Init(&(zvm_ctx.zvm_sound_on1), "ventilateurs_marche.wav", ZVM_MAXIMUM_VOLUME);
-	SOUND_Init(&(zvm_ctx.zvm_sound_on2), "ventilateurs_marche.wav", ZVM_MAXIMUM_VOLUME);
-	SOUND_Init(&(zvm_ctx.zvm_sound_turnoff), "ventilateurs_extinction.wav", ZVM_MAXIMUM_VOLUME);
+	SOUND_Init(&(zvm_ctx.zvm_sound_turnon), "zvm_turnon.wav", ZVM_AUDIO_GAIN);
+	SOUND_Init(&(zvm_ctx.zvm_sound_on1), "zvm_on.wav", ZVM_AUDIO_GAIN);
+	SOUND_Init(&(zvm_ctx.zvm_sound_on2), "zvm_on.wav", ZVM_AUDIO_GAIN);
+	SOUND_Init(&(zvm_ctx.zvm_sound_turnoff), "zvm_turnoff.wav", ZVM_AUDIO_GAIN);
 	// Init state machine.
 	zvm_ctx.zvm_on = 0;
 	zvm_ctx.zvm_state = ZVM_STATE_OFF;

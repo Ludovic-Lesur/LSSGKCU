@@ -8,8 +8,12 @@
 #include "lsmcu.h"
 
 #include "C:/Users/Ludovic/Documents/Eclipse/LSMCU/inc/applicative/lssgkcu.h"
+#include "kvb.h"
 #include "serial.h"
 #include "stdio.h"
+#include "zba.h"
+#include "zdj.h"
+#include "zpt.h"
 #include "zvm.h"
 
 /*** LSMCU local macros ***/
@@ -59,6 +63,36 @@ void LSMCU_Task(void) {
 #endif
 		// Decode incoming command.
 		switch (rx_command) {
+		case LSMCU_OUT_ZBA_ON:
+			ZBA_TurnOn();
+			break;
+		case LSMCU_OUT_ZBA_OFF:
+			ZBA_TurnOff();
+			break;
+		case LSMCU_OUT_ZDV_ON:
+			KVB_TurnOn();
+			break;
+		case LSMCU_OUT_ZDV_OFF:
+			KVB_TurnOff();
+			break;
+		case LSMCU_OUT_ZPT_BACK_UP:
+			ZPT_BackUp();
+			break;
+		case LSMCU_OUT_ZPT_BACK_DOWN:
+			ZPT_BackDown();
+			break;
+		case LSMCU_OUT_ZPT_FRONT_UP:
+			ZPT_FrontUp();
+			break;
+		case LSMCU_OUT_ZPT_FRONT_DOWN:
+			ZPT_FrontDown();
+			break;
+		case LSMCU_OUT_ZDJ_OFF:
+			ZDJ_Open();
+			break;
+		case LSMCU_OUT_ZEN_ON:
+			ZDJ_Lock();
+			break;
 		case LSMCU_OUT_ZVM_ON:
 			ZVM_TurnOn();
 			break;

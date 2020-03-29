@@ -10,6 +10,11 @@
 
 /*** MIXER macros ***/
 
-#define ZVM_MAXIMUM_VOLUME	1.0
+#define ZBA_AUDIO_GAIN			1.0
+#define KVB_AUDIO_GAIN			1.0
+#define ZPT_BACK_AUDIO_GAIN		0.7
+#define ZPT_FRONT_AUDIO_GAIN	1.0
+#define ZDJ_AUDIO_GAIN			1.0
+#define ZVM_AUDIO_GAIN			1.0
 
 #endif /* INC_APPLICATIVE_MIXER_H_ */

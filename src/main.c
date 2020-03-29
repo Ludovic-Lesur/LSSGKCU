@@ -6,11 +6,14 @@
  */
 
 #include "keyboard.h"
+#include "kvb.h"
 #include "lsmcu.h"
-#include "serial.h"
 #include "sound.h"
 #include "stdio.h"
 #include "time.h"
+#include "zba.h"
+#include "zdj.h"
+#include "zpt.h"
 #include "zvm.h"
 
 /* MAIN FUNCTION.
@@ -27,15 +30,18 @@ int main (void) {
 	TIME_Init();
 	// Init sounds.
 	SOUND_FmodSystemInit();
+	ZBA_Init();
+	KVB_Init();
+	ZPT_Init();
+	ZDJ_Init();
 	ZVM_Init();
 	// Init serial link.
-	LSMCU_Init("COM3");
+	LSMCU_Init("COM5");
 	// Main loop.
 	while (1) {
 		LSMCU_Task();
+		KVB_Task();
 		ZVM_Task();
 	}
-	printf("End of program");
-
 	return 0;
 }
