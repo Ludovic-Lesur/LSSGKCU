@@ -9,6 +9,7 @@
 
 #include "C:/Users/Ludovic/Documents/Eclipse/LSMCU/inc/applicative/lssgkcu.h"
 #include "kvb.h"
+#include "log.h"
 #include "serial.h"
 #include "stdio.h"
 #include "zba.h"
@@ -71,9 +72,11 @@ void LSMCU_Task(void) {
 			break;
 		case LSMCU_OUT_ZDV_ON:
 			KVB_TurnOn();
+			LOG_Enable();
 			break;
 		case LSMCU_OUT_ZDV_OFF:
 			KVB_TurnOff();
+			LOG_Disable();
 			break;
 		case LSMCU_OUT_ZPT_BACK_UP:
 			ZPT_BackUp();

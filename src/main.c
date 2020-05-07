@@ -7,6 +7,7 @@
 
 #include "keyboard.h"
 #include "kvb.h"
+#include "log.h"
 #include "lsmcu.h"
 #include "sound.h"
 #include "stdio.h"
@@ -28,6 +29,8 @@ int main (void) {
 	fflush(stdout);
 	// Init time.
 	TIME_Init();
+	// Init log.
+	LOG_Init();
 	// Init sounds.
 	SOUND_FmodSystemInit();
 	ZBA_Init();
@@ -42,6 +45,7 @@ int main (void) {
 		LSMCU_Task();
 		KVB_Task();
 		ZVM_Task();
+		LOG_Task();
 	}
 	return 0;
 }

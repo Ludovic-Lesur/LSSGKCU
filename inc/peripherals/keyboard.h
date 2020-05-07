@@ -10,9 +10,9 @@
 
 /*** KEYBOARD macros ***/
 
-#define KEY_ARRAY_SIZE 2
-#define KEY_CODE_INDEX 0
-#define KEY_SCAN_INDEX 1
+#define KEY_ARRAY_SIZE	2
+#define KEY_CODE_INDEX 	0
+#define KEY_SCAN_INDEX 	1
 
 /*** KEYBAORD extern variables ***/
 

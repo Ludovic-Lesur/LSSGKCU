@@ -64,7 +64,7 @@ void KEYBOARD_Write(const char key[KEY_ARRAY_SIZE]) {
 void KEYBOARD_Press(const char key[KEY_ARRAY_SIZE]) {
 	keybd_event(key[KEY_CODE_INDEX], key[KEY_SCAN_INDEX], 0, WM_KEYDOWN);
 #ifdef KEYBOARD_LOG
-	printf("KEYBOARD *** Write press 0x%x\n", key[KEY_CODE_INDEX]);
+	printf("KEYBOARD *** Press key 0x%x\n", key[KEY_CODE_INDEX]);
 	fflush(stdout);
 #endif
 }
@@ -76,7 +76,7 @@ void KEYBOARD_Press(const char key[KEY_ARRAY_SIZE]) {
 void Keyboard_Release(const char key[KEY_ARRAY_SIZE]) {
 	keybd_event(key[KEY_CODE_INDEX], key[KEY_SCAN_INDEX], 0, WM_KEYUP);
 #ifdef KEYBOARD_LOG
-	printf("KEYBOARD *** Write release 0x%x\n", key[KEY_CODE_INDEX]);
+	printf("KEYBOARD *** Release key 0x%x\n", key[KEY_CODE_INDEX]);
 	fflush(stdout);
 #endif
 }
