@@ -16,5 +16,6 @@
 #define ZPT_FRONT_AUDIO_GAIN	1.0
 #define ZDJ_AUDIO_GAIN			1.0
 #define ZVM_AUDIO_GAIN			1.0
+#define COMP_AUDIO_GAIN			1.0
 
-#endif /* INC_APPLICATIVE_MIXER_H_ */
+#endif /* MIXER_H */

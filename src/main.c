@@ -5,6 +5,7 @@
  *      Author: Ludo
  */
 
+#include "comp.h"
 #include "keyboard.h"
 #include "kvb.h"
 #include "log.h"
@@ -33,19 +34,21 @@ int main (void) {
 	LOG_Init();
 	// Init sounds.
 	SOUND_FmodSystemInit();
-	ZBA_Init();
+	COMP_Init();
 	KVB_Init();
-	ZPT_Init();
+	ZBA_Init();
 	ZDJ_Init();
+	ZPT_Init();
 	ZVM_Init();
 	// Init serial link.
 	LSMCU_Init("COM5");
 	// Main loop.
 	while (1) {
+		COMP_Task();
+		LOG_Task();
 		LSMCU_Task();
 		KVB_Task();
 		ZVM_Task();
-		LOG_Task();
 	}
 	return 0;
 }

@@ -7,6 +7,7 @@
 
 #include "lsmcu.h"
 
+#include "comp.h"
 #include "C:/Users/Ludovic/Documents/Eclipse/LSMCU/inc/applicative/lssgkcu.h"
 #include "kvb.h"
 #include "log.h"
@@ -95,6 +96,18 @@ void LSMCU_Task(void) {
 			break;
 		case LSMCU_OUT_ZEN_ON:
 			ZDJ_Lock();
+			break;
+		case LSMCU_OUT_COMP_AUTO_REG_MIN_ON:
+			COMP_PlayAutoRegulationMin();
+			break;
+		case LSMCU_OUT_COMP_AUTO_REG_MAX_ON:
+			COMP_PlayAutoRegulationMax();
+			break;
+		case LSMCU_OUT_COMP_DIRECT_ON:
+			COMP_PlayDirect();
+			break;
+		case LSMCU_OUT_COMP_OFF:
+			COMP_TurnOff();
 			break;
 		case LSMCU_OUT_ZVM_ON:
 			ZVM_TurnOn();

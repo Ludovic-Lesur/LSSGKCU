@@ -260,8 +260,9 @@ void ZVM_Task(void) {
 			zvm_ctx.zvm_state = ZVM_STATE_OFF;
 		}
 		break;
-	// Unknown state.
 	default:
+		// Unknown state.
+		zvm_ctx.zvm_state = ZVM_STATE_OFF;
 		break;
 	}
 }
