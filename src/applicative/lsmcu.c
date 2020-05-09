@@ -9,9 +9,12 @@
 
 #include "comp.h"
 #include "C:/Users/Ludovic/Documents/Eclipse/LSMCU/inc/applicative/lssgkcu.h"
+#include "fd.h"
+#include "fpb.h"
 #include "kvb.h"
 #include "lights.h"
 #include "log.h"
+#include "mpinv.h"
 #include "serial.h"
 #include "stdio.h"
 #include "zba.h"
@@ -110,11 +113,44 @@ void LSMCU_Task(void) {
 		case LSMCU_OUT_COMP_OFF:
 			COMP_TurnOff();
 			break;
+		case LSMCU_OUT_FPB_ON:
+			FPB_On();
+			break;
+		case LSMCU_OUT_FPB_OFF:
+			FPB_Off();
+			break;
+		case LSMCU_OUT_FPB_APPLY:
+			FPB_Apply();
+			break;
+		case LSMCU_OUT_FPB_NEUTRAL:
+			FPB_Neutral();
+			break;
+		case LSMCU_OUT_FPB_RELEASE:
+			FPB_Release();
+			break;
 		case LSMCU_OUT_ZVM_ON:
 			ZVM_TurnOn();
 			break;
 		case LSMCU_OUT_ZVM_OFF:
 			ZVM_TurnOff();
+			break;
+		case LSMCU_OUT_MPINV_FORWARD:
+			MPINV_Forward();
+			break;
+		case LSMCU_OUT_MPINV_NEUTRAL:
+			MPINV_Neutral();
+			break;
+		case LSMCU_OUT_MPINV_BACKWARD:
+			MPINV_Backward();
+			break;
+		case LSMCU_OUT_FD_APPLY:
+			FD_Apply();
+			break;
+		case LSMCU_OUT_FD_NEUTRAL:
+			FD_Neutral();
+			break;
+		case LSMCU_OUT_FD_RELEASE:
+			FD_Release();
 			break;
 		case LSMCU_OUT_ZFG_ON:
 			LIGHTS_ZfgOn();

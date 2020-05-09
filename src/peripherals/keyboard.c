@@ -44,7 +44,7 @@ static KEYBOARD_Context keyboard_ctx;
  * @param key:	Key to press.
  * @return:		None.
  */
-void KEYBOARD_Press(KEYBOARD_Key* key) {
+void KEYBOARD_Press(const KEYBOARD_Key* key) {
 	keybd_event((key -> keyboard_key_code), (key -> keyboard_key_scan), 0, 0);
 #ifdef KEYBOARD_LOG
 	printf("KEYBOARD *** Press key 0x%x\n", (key -> keyboard_key_code));
@@ -56,7 +56,7 @@ void KEYBOARD_Press(KEYBOARD_Key* key) {
  * @param key:	Key to release.
  * @return:		None.
  */
-void KEYBOARD_Release(KEYBOARD_Key* key) {
+void KEYBOARD_Release(const KEYBOARD_Key* key) {
 	keybd_event((key -> keyboard_key_code), (key -> keyboard_key_scan), KEYEVENTF_KEYUP, 0);
 #ifdef KEYBOARD_LOG
 	printf("KEYBOARD *** Release key 0x%x\n", (key -> keyboard_key_code));
@@ -83,7 +83,7 @@ void KEYBOARD_Init(void) {
  * @param press_duration_ms:	Key press duration in ms.
  * @return:						None.
  */
-void KEYBOARD_Send(KEYBOARD_Key* key, unsigned int press_duration_ms) {
+void KEYBOARD_Send(const KEYBOARD_Key* key, unsigned int press_duration_ms) {
 	// Fill buffers.
 	keyboard_ctx.keyboard_key_buf[keyboard_ctx.keyboard_buf_write_idx].keyboard_key_code = (key -> keyboard_key_code);
 	keyboard_ctx.keyboard_key_buf[keyboard_ctx.keyboard_buf_write_idx].keyboard_key_scan = (key -> keyboard_key_scan);

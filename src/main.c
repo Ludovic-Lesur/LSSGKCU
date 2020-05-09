@@ -6,11 +6,14 @@
  */
 
 #include "comp.h"
+#include "fd.h"
+#include "fpb.h"
 #include "keyboard.h"
 #include "kvb.h"
 #include "lights.h"
 #include "log.h"
 #include "lsmcu.h"
+#include "mpinv.h"
 #include "sound.h"
 #include "stdio.h"
 #include "time.h"
@@ -36,9 +39,12 @@ int main (void) {
 	// Init modules.
 	SOUND_FmodSystemInit();
 	COMP_Init();
+	FD_Init();
+	FPB_Init();
 	KEYBOARD_Init();
 	KVB_Init();
 	LIGHTS_Init();
+	MPINV_Init();
 	ZBA_Init();
 	ZDJ_Init();
 	ZPT_Init();
@@ -48,6 +54,7 @@ int main (void) {
 	// Main loop.
 	while (1) {
 		COMP_Task();
+		FD_Task();
 		LIGHTS_Task();
 		LOG_Task();
 		LSMCU_Task();
