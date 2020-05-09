@@ -15,13 +15,13 @@
 
 #define COMP_FADE_DURATION_MS	1000
 #define COMP_FADE_MARGIN_MS		1000 // Added to fade duration.
+#define COMP_AUTO_OFF_MARGIN_MS	2000 // Automatically return to off state when sound position reaches its duration minus this margin.
 
 /*** COMP local structures ***/
 
 typedef enum {
 	COMP_STATE_OFF,
-	COMP_STATE_AUTO_REG_MIN,
-	COMP_STATE_AUTO_REG_MAX,
+	COMP_STATE_AUTO_REG_MIN_MAX,
 	COMP_STATE_AUTO_TURNOFF,
 	COMP_STATE_DIRECT_TURNON,
 	COMP_STATE_DIRECT_TURNON_TO_ON1,
@@ -29,7 +29,7 @@ typedef enum {
 	COMP_STATE_DIRECT_ON1_TO_ON2,
 	COMP_STATE_DIRECT_ON2,
 	COMP_STATE_DIRECT_ON2_TO_ON1,
-	COMP_STATE_TURNOFF
+	COMP_STATE_DIRECT_TURNOFF
 } COMP_State;
 
 typedef enum {
@@ -123,6 +123,9 @@ void COMP_TurnOff(void) {
  */
 void COMP_Task(void) {
 	// Local variables.
+	unsigned char comp_auto_reg_min_fade_end = 0;
+	unsigned char comp_auto_reg_max_fade_end = 0;
+	unsigned char comp_auto_turnoff_fade_end = 0;
 	unsigned char comp_direct_turnon_fade_end = 0;
 	unsigned char comp_direct_on1_fade_end = 0;
 	unsigned char comp_direct_on2_fade_end = 0;
@@ -134,11 +137,91 @@ void COMP_Task(void) {
 			// Start playing turn-on sound.
 			SOUND_SetVolume(&(comp_ctx.comp_sound_direct_turnon), 1.0); // No fade-in effect required.
 			SOUND_Play(&(comp_ctx.comp_sound_direct_turnon));
+			SOUND_SaveFadeParameters(&(comp_ctx.comp_sound_direct_turnon));
 			comp_ctx.comp_state = COMP_STATE_DIRECT_TURNON;
+		}
+		else {
+			if (comp_ctx.comp_sound_request == COMP_SOUND_REQUEST_REG_MIN) {
+				// Start playing minimum regulation sound.
+				SOUND_SetVolume(&(comp_ctx.comp_sound_auto_reg_min), 1.0); // No fade-in effect required.
+				SOUND_Play(&(comp_ctx.comp_sound_auto_reg_min));
+				SOUND_SaveFadeParameters(&(comp_ctx.comp_sound_auto_reg_min));
+				comp_ctx.comp_state = COMP_STATE_AUTO_REG_MIN_MAX;
+			}
+			else {
+				if (comp_ctx.comp_sound_request == COMP_SOUND_REQUEST_REG_MAX) {
+					// Start playing maximum regulation sound.
+					SOUND_SetVolume(&(comp_ctx.comp_sound_auto_reg_max), 1.0); // No fade-in effect required.
+					SOUND_Play(&(comp_ctx.comp_sound_auto_reg_max));
+					SOUND_SaveFadeParameters(&(comp_ctx.comp_sound_auto_reg_max));
+					comp_ctx.comp_state = COMP_STATE_AUTO_REG_MIN_MAX;
+				}
+			}
+		}
+		break;
+	case COMP_STATE_AUTO_REG_MIN_MAX:
+		// Auto to direct mode.
+		if (comp_ctx.comp_sound_request == COMP_SOUND_REQUEST_DIRECT) {
+			// Save all auto sounds.
+			SOUND_SaveFadeParameters(&(comp_ctx.comp_sound_auto_reg_min));
+			SOUND_SaveFadeParameters(&(comp_ctx.comp_sound_auto_reg_max));
+			SOUND_SaveFadeParameters(&(comp_ctx.comp_sound_auto_turnoff));
+			// Start playing turn-on sound.
+			SOUND_SetVolume(&(comp_ctx.comp_sound_direct_turnon), 1.0); // No fade-in effect required.
+			SOUND_Play(&(comp_ctx.comp_sound_direct_turnon));
+			SOUND_SaveFadeParameters(&(comp_ctx.comp_sound_direct_turnon));
+			comp_ctx.comp_state = COMP_STATE_DIRECT_TURNON;
+		}
+		else {
+			if (comp_ctx.comp_sound_request == COMP_SOUND_REQUEST_OFF) {
+				// Save all regulation sounds.
+				SOUND_SaveFadeParameters(&(comp_ctx.comp_sound_auto_reg_min));
+				SOUND_SaveFadeParameters(&(comp_ctx.comp_sound_auto_reg_max));
+				// Start playing turn-off sound.
+				SOUND_SetVolume(&(comp_ctx.comp_sound_auto_turnoff), 0.0);
+				SOUND_Play(&(comp_ctx.comp_sound_auto_turnoff));
+				SOUND_SaveFadeParameters(&(comp_ctx.comp_sound_auto_turnoff));
+				comp_ctx.comp_state = COMP_STATE_AUTO_TURNOFF;
+			}
+			else {
+				if ((SOUND_GetPositionMs(&(comp_ctx.comp_sound_auto_reg_min)) > (SOUND_GetLengthMs(&(comp_ctx.comp_sound_auto_reg_min)) - COMP_AUTO_OFF_MARGIN_MS)) ||
+					(SOUND_GetPositionMs(&(comp_ctx.comp_sound_auto_reg_max)) > (SOUND_GetLengthMs(&(comp_ctx.comp_sound_auto_reg_max)) - COMP_AUTO_OFF_MARGIN_MS))) {
+					// Automatically return to off state.
+					comp_ctx.comp_state = COMP_STATE_OFF;
+				}
+			}
+		}
+		break;
+	case COMP_STATE_AUTO_TURNOFF:
+		// Auto to direct mode.
+		if (comp_ctx.comp_sound_request == COMP_SOUND_REQUEST_DIRECT) {
+			// Save all auto sounds.
+			SOUND_SaveFadeParameters(&(comp_ctx.comp_sound_auto_reg_min));
+			SOUND_SaveFadeParameters(&(comp_ctx.comp_sound_auto_reg_max));
+			SOUND_SaveFadeParameters(&(comp_ctx.comp_sound_auto_turnoff));
+			// Start playing direct turn-on sound.
+			SOUND_SetVolume(&(comp_ctx.comp_sound_direct_turnon), 1.0); // No fade-in effect required.
+			SOUND_Play(&(comp_ctx.comp_sound_direct_turnon));
+			SOUND_SaveFadeParameters(&(comp_ctx.comp_sound_direct_turnon));
+			comp_ctx.comp_state = COMP_STATE_DIRECT_TURNON;
+		}
+		else {
+			// Perform turn-off fade-in and all other fade-out.
+			comp_auto_turnoff_fade_end = SOUND_FadeIn(&(comp_ctx.comp_sound_auto_turnoff), COMP_FADE_DURATION_MS);
+			comp_auto_reg_min_fade_end = SOUND_FadeOut(&(comp_ctx.comp_sound_auto_reg_min), COMP_FADE_DURATION_MS);
+			comp_auto_reg_max_fade_end = SOUND_FadeOut(&(comp_ctx.comp_sound_auto_reg_max), COMP_FADE_DURATION_MS);
+			// Change state when effect is complete.
+			if ((comp_auto_turnoff_fade_end > 0) && (comp_auto_reg_min_fade_end > 0) && (comp_auto_reg_max_fade_end > 0)) {
+				// Stop regulation min and max sounds.
+				SOUND_Stop(&(comp_ctx.comp_sound_auto_reg_min));
+				SOUND_Stop(&(comp_ctx.comp_sound_auto_reg_max));
+				comp_ctx.comp_state = COMP_STATE_OFF;
+			}
 		}
 		break;
 	case COMP_STATE_DIRECT_TURNON:
-		if (comp_ctx.comp_sound_request == COMP_SOUND_REQUEST_OFF) {
+		// Perform required fade-out effects.
+		if (comp_ctx.comp_sound_request != COMP_SOUND_REQUEST_DIRECT) {
 			// Save all other sounds volume.
 			SOUND_SaveFadeParameters(&(comp_ctx.comp_sound_direct_turnon));
 			SOUND_SaveFadeParameters(&(comp_ctx.comp_sound_direct_on1));
@@ -147,7 +230,7 @@ void COMP_Task(void) {
 			SOUND_SetVolume(&(comp_ctx.comp_sound_direct_turnoff), 0.0);
 			SOUND_Play(&(comp_ctx.comp_sound_direct_turnoff));
 			SOUND_SaveFadeParameters(&(comp_ctx.comp_sound_direct_turnoff));
-			comp_ctx.comp_state = COMP_STATE_TURNOFF;
+			comp_ctx.comp_state = COMP_STATE_DIRECT_TURNOFF;
 		}
 		else {
 			if ((SOUND_GetPositionMs(&(comp_ctx.comp_sound_direct_turnon))) > ((SOUND_GetLengthMs(&(comp_ctx.comp_sound_direct_turnon))) - COMP_FADE_DURATION_MS - COMP_FADE_MARGIN_MS)) {
@@ -161,10 +244,20 @@ void COMP_Task(void) {
 				SOUND_Stop(&(comp_ctx.comp_sound_direct_turnoff));
 				comp_ctx.comp_state = COMP_STATE_DIRECT_TURNON_TO_ON1;
 			}
+			else {
+				// Perform all required fade-out effects.
+				SOUND_FadeOut(&(comp_ctx.comp_sound_auto_reg_min), COMP_FADE_DURATION_MS);
+				SOUND_FadeOut(&(comp_ctx.comp_sound_auto_reg_max), COMP_FADE_DURATION_MS);
+				SOUND_FadeOut(&(comp_ctx.comp_sound_auto_turnoff), COMP_FADE_DURATION_MS);
+			}
 		}
 		break;
 	case COMP_STATE_DIRECT_TURNON_TO_ON1:
-		if (comp_ctx.comp_sound_request == COMP_SOUND_REQUEST_OFF) {
+		if (comp_ctx.comp_sound_request != COMP_SOUND_REQUEST_DIRECT) {
+			// Stop any auto sound.
+			SOUND_Stop(&(comp_ctx.comp_sound_auto_reg_min));
+			SOUND_Stop(&(comp_ctx.comp_sound_auto_reg_max));
+			SOUND_Stop(&(comp_ctx.comp_sound_auto_turnoff));
 			// Save all other sounds volume.
 			SOUND_SaveFadeParameters(&(comp_ctx.comp_sound_direct_turnon));
 			SOUND_SaveFadeParameters(&(comp_ctx.comp_sound_direct_on1));
@@ -173,7 +266,7 @@ void COMP_Task(void) {
 			SOUND_SetVolume(&(comp_ctx.comp_sound_direct_turnoff), 0.0);
 			SOUND_Play(&(comp_ctx.comp_sound_direct_turnoff));
 			SOUND_SaveFadeParameters(&(comp_ctx.comp_sound_direct_turnoff));
-			comp_ctx.comp_state = COMP_STATE_TURNOFF;
+			comp_ctx.comp_state = COMP_STATE_DIRECT_TURNOFF;
 		}
 		else {
 			// Perform turn-on fade-out and On1 fade-in.
@@ -188,7 +281,7 @@ void COMP_Task(void) {
 		}
 		break;
 	case COMP_STATE_DIRECT_ON1:
-		if (comp_ctx.comp_sound_request == COMP_SOUND_REQUEST_OFF) {
+		if (comp_ctx.comp_sound_request != COMP_SOUND_REQUEST_DIRECT) {
 			// Save all other sounds volume.
 			SOUND_SaveFadeParameters(&(comp_ctx.comp_sound_direct_turnon));
 			SOUND_SaveFadeParameters(&(comp_ctx.comp_sound_direct_on1));
@@ -197,7 +290,7 @@ void COMP_Task(void) {
 			SOUND_SetVolume(&(comp_ctx.comp_sound_direct_turnoff), 0.0);
 			SOUND_Play(&(comp_ctx.comp_sound_direct_turnoff));
 			SOUND_SaveFadeParameters(&(comp_ctx.comp_sound_direct_turnoff));
-			comp_ctx.comp_state = COMP_STATE_TURNOFF;
+			comp_ctx.comp_state = COMP_STATE_DIRECT_TURNOFF;
 		}
 		else {
 			if ((SOUND_GetPositionMs(&(comp_ctx.comp_sound_direct_on1))) > ((SOUND_GetLengthMs(&(comp_ctx.comp_sound_direct_on1))) - COMP_FADE_DURATION_MS - COMP_FADE_MARGIN_MS)) {
@@ -212,7 +305,7 @@ void COMP_Task(void) {
 		}
 		break;
 	case COMP_STATE_DIRECT_ON1_TO_ON2:
-		if (comp_ctx.comp_sound_request == COMP_SOUND_REQUEST_OFF) {
+		if (comp_ctx.comp_sound_request != COMP_SOUND_REQUEST_DIRECT) {
 			// Save all other sounds volume.
 			SOUND_SaveFadeParameters(&(comp_ctx.comp_sound_direct_turnon));
 			SOUND_SaveFadeParameters(&(comp_ctx.comp_sound_direct_on1));
@@ -221,7 +314,7 @@ void COMP_Task(void) {
 			SOUND_SetVolume(&(comp_ctx.comp_sound_direct_turnoff), 0.0);
 			SOUND_Play(&(comp_ctx.comp_sound_direct_turnoff));
 			SOUND_SaveFadeParameters(&(comp_ctx.comp_sound_direct_turnoff));
-			comp_ctx.comp_state = COMP_STATE_TURNOFF;
+			comp_ctx.comp_state = COMP_STATE_DIRECT_TURNOFF;
 		}
 		else {
 			// Perform On1 fade-out and On2 fade-in.
@@ -236,7 +329,7 @@ void COMP_Task(void) {
 		}
 		break;
 	case COMP_STATE_DIRECT_ON2:
-		if (comp_ctx.comp_sound_request == COMP_SOUND_REQUEST_OFF) {
+		if (comp_ctx.comp_sound_request != COMP_SOUND_REQUEST_DIRECT) {
 			// Save all other sounds volume.
 			SOUND_SaveFadeParameters(&(comp_ctx.comp_sound_direct_turnon));
 			SOUND_SaveFadeParameters(&(comp_ctx.comp_sound_direct_on1));
@@ -245,7 +338,7 @@ void COMP_Task(void) {
 			SOUND_SetVolume(&(comp_ctx.comp_sound_direct_turnoff), 0.0);
 			SOUND_Play(&(comp_ctx.comp_sound_direct_turnoff));
 			SOUND_SaveFadeParameters(&(comp_ctx.comp_sound_direct_turnoff));
-			comp_ctx.comp_state = COMP_STATE_TURNOFF;
+			comp_ctx.comp_state = COMP_STATE_DIRECT_TURNOFF;
 		}
 		else {
 			if ((SOUND_GetPositionMs(&(comp_ctx.comp_sound_direct_on2))) > ((SOUND_GetLengthMs(&(comp_ctx.comp_sound_direct_on2))) - COMP_FADE_DURATION_MS - COMP_FADE_MARGIN_MS)) {
@@ -260,7 +353,7 @@ void COMP_Task(void) {
 		}
 		break;
 	case COMP_STATE_DIRECT_ON2_TO_ON1:
-		if (comp_ctx.comp_sound_request == COMP_SOUND_REQUEST_OFF) {
+		if (comp_ctx.comp_sound_request != COMP_SOUND_REQUEST_DIRECT) {
 			// Save all other sounds volume.
 			SOUND_SaveFadeParameters(&(comp_ctx.comp_sound_direct_turnon));
 			SOUND_SaveFadeParameters(&(comp_ctx.comp_sound_direct_on1));
@@ -269,7 +362,7 @@ void COMP_Task(void) {
 			SOUND_SetVolume(&(comp_ctx.comp_sound_direct_turnoff), 0.0);
 			SOUND_Play(&(comp_ctx.comp_sound_direct_turnoff));
 			SOUND_SaveFadeParameters(&(comp_ctx.comp_sound_direct_turnoff));
-			comp_ctx.comp_state = COMP_STATE_TURNOFF;
+			comp_ctx.comp_state = COMP_STATE_DIRECT_TURNOFF;
 		}
 		else {
 			// Perform On2 fade-out and On1 fade-in.
@@ -283,7 +376,7 @@ void COMP_Task(void) {
 			}
 		}
 		break;
-	case COMP_STATE_TURNOFF:
+	case COMP_STATE_DIRECT_TURNOFF:
 		// Perform turn-off fade-in and all other fade-out.
 		comp_direct_turnoff_fade_end = SOUND_FadeIn(&(comp_ctx.comp_sound_direct_turnoff), COMP_FADE_DURATION_MS);
 		comp_direct_turnon_fade_end = SOUND_FadeOut(&(comp_ctx.comp_sound_direct_turnon), COMP_FADE_DURATION_MS);

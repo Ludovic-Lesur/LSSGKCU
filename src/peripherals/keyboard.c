@@ -12,7 +12,7 @@
 
 /*** KEYBOARD macros ***/
 
-#define KEYBOARD_LOG
+//#define KEYBOARD_LOG
 
 /*** KEYBOARD extern variables initialisation ***/
 

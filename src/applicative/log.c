@@ -143,13 +143,17 @@ void LOG_Task(void) {
 		// Get speed.
 		unsigned char speed_kmh = LOG_GetSpeed();
 		if (speed_kmh != LOG_SPEED_ERROR) {
+#ifdef LOG_DEBUG
 			printf("LOG *** Speed = %dkm/h\n", speed_kmh);
+#endif
 			// Transmit to dashboard.
 			LSMCU_Send(speed_kmh);
 		}
+#ifdef LOG_DEBUG
 		else {
 			printf("LOG *** Speed error\n");
 		}
 		fflush(stdout);
+#endif
 	}
 }
