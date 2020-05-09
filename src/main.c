@@ -13,6 +13,7 @@
 #include "lights.h"
 #include "log.h"
 #include "lsmcu.h"
+#include "mp.h"
 #include "mpinv.h"
 #include "sound.h"
 #include "stdio.h"
@@ -44,6 +45,7 @@ int main (void) {
 	KEYBOARD_Init();
 	KVB_Init();
 	LIGHTS_Init();
+	MP_Init();
 	MPINV_Init();
 	ZBA_Init();
 	ZDJ_Init();

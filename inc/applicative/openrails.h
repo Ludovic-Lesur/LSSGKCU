@@ -14,7 +14,7 @@
 
 // Press duration to make the shortcuts work (in milliseconds).
 #define OPENRAILS_PRESS_DURATION_MS_DEFAULT 	100
-#define OPENRAILS_PRESS_DURATION_MS_TRAC 		300
+#define OPENRAILS_PRESS_DURATION_MS_MP 			300
 // ZPT.
 #define OPENRAILS_ZPT_FRONT_TOGGLE				&KEY_A
 #define OPENRAILS_ZPT_BACK_TOGGLE				&KEY_B
@@ -22,9 +22,9 @@
 #define OPENRAILS_MPINV_FORWARD					&KEY_C
 #define OPENRAILS_MPINV_BACKWARD				&KEY_D
 // MP.
-#define OPENRAILS_MP_TP							&KEY_E
-#define OPENRAILS_MP_TM 						&KEY_F
-#define OPENRAILS_MP_T0 						&KEY_G
+#define OPENRAILS_MP_T_MORE						&KEY_E
+#define OPENRAILS_MP_T_LESS 					&KEY_F
+#define OPENRAILS_MP_0 							&KEY_G
 // FPB.
 #define OPENRAILS_FPB_APPLY 					&KEY_H
 #define OPENRAILS_FPB_RELEASE 					&KEY_I

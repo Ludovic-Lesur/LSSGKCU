@@ -14,6 +14,7 @@
 #include "kvb.h"
 #include "lights.h"
 #include "log.h"
+#include "mp.h"
 #include "mpinv.h"
 #include "serial.h"
 #include "stdio.h"
@@ -142,6 +143,15 @@ void LSMCU_Task(void) {
 			break;
 		case LSMCU_OUT_MPINV_BACKWARD:
 			MPINV_Backward();
+			break;
+		case LSMCU_OUT_MP_0:
+			MP_0();
+			break;
+		case LSMCU_OUT_MP_T_MORE:
+			MP_T_More();
+			break;
+		case LSMCU_OUT_MP_T_LESS:
+			MP_T_Less();
 			break;
 		case LSMCU_OUT_FD_APPLY:
 			FD_Apply();
