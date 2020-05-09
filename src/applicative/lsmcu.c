@@ -10,6 +10,7 @@
 #include "comp.h"
 #include "C:/Users/Ludovic/Documents/Eclipse/LSMCU/inc/applicative/lssgkcu.h"
 #include "kvb.h"
+#include "lights.h"
 #include "log.h"
 #include "serial.h"
 #include "stdio.h"
@@ -114,6 +115,24 @@ void LSMCU_Task(void) {
 			break;
 		case LSMCU_OUT_ZVM_OFF:
 			ZVM_TurnOff();
+			break;
+		case LSMCU_OUT_ZFG_ON:
+			LIGHTS_ZfgOn();
+			break;
+		case LSMCU_OUT_ZFG_OFF:
+			LIGHTS_ZfgOff();
+			break;
+		case LSMCU_OUT_ZFD_ON:
+			LIGHTS_ZfdOn();
+			break;
+		case LSMCU_OUT_ZFD_OFF:
+			LIGHTS_ZfdOff();
+			break;
+		case LSMCU_OUT_ZPR_ON:
+			LIGHTS_ZprOn();
+			break;
+		case LSMCU_OUT_ZPR_OFF:
+			LIGHTS_ZprOff();
 			break;
 		default:
 			// Unknwon command.

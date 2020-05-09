@@ -8,6 +8,7 @@
 #include "comp.h"
 #include "keyboard.h"
 #include "kvb.h"
+#include "lights.h"
 #include "log.h"
 #include "lsmcu.h"
 #include "sound.h"
@@ -32,10 +33,12 @@ int main (void) {
 	TIME_Init();
 	// Init log.
 	LOG_Init();
-	// Init sounds.
+	// Init modules.
 	SOUND_FmodSystemInit();
 	COMP_Init();
+	KEYBOARD_Init();
 	KVB_Init();
+	LIGHTS_Init();
 	ZBA_Init();
 	ZDJ_Init();
 	ZPT_Init();
@@ -45,8 +48,10 @@ int main (void) {
 	// Main loop.
 	while (1) {
 		COMP_Task();
+		LIGHTS_Task();
 		LOG_Task();
 		LSMCU_Task();
+		KEYBOARD_Task();
 		KVB_Task();
 		ZVM_Task();
 	}

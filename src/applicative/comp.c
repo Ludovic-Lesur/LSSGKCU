@@ -187,6 +187,7 @@ void COMP_Task(void) {
 				if ((SOUND_GetPositionMs(&(comp_ctx.comp_sound_auto_reg_min)) > (SOUND_GetLengthMs(&(comp_ctx.comp_sound_auto_reg_min)) - COMP_AUTO_OFF_MARGIN_MS)) ||
 					(SOUND_GetPositionMs(&(comp_ctx.comp_sound_auto_reg_max)) > (SOUND_GetLengthMs(&(comp_ctx.comp_sound_auto_reg_max)) - COMP_AUTO_OFF_MARGIN_MS))) {
 					// Automatically return to off state.
+					comp_ctx.comp_sound_request = COMP_SOUND_REQUEST_OFF;
 					comp_ctx.comp_state = COMP_STATE_OFF;
 				}
 			}

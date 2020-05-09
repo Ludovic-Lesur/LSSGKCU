@@ -18,7 +18,7 @@
 
 /*** LOG local macros ***/
 
-#define LOG_PERIOD_MS			1000
+#define LOG_PERIOD_MS			500
 #define LOG_SPEED_MAX_LENGTH	10
 #define LOG_SPEED_ERROR			0xFF
 //#define LOG_DEBUG
@@ -139,7 +139,7 @@ void LOG_Task(void) {
 		// Update next time.
 		log_ctx.log_next_time = TIME_GetMs() + LOG_PERIOD_MS;
 		// Activate log.
-		KEYBOARD_Write(OPENRAILS_LOG);
+		KEYBOARD_Send(OPENRAILS_LOG, OPENRAILS_PRESS_DURATION_MS_DEFAULT);
 		// Get speed.
 		unsigned char speed_kmh = LOG_GetSpeed();
 		if (speed_kmh != LOG_SPEED_ERROR) {
