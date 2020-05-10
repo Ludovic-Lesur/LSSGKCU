@@ -15,6 +15,7 @@
 #include "lsmcu.h"
 #include "mp.h"
 #include "mpinv.h"
+#include "s.h"
 #include "sound.h"
 #include "stdio.h"
 #include "time.h"
@@ -47,6 +48,7 @@ int main (void) {
 	LIGHTS_Init();
 	MP_Init();
 	MPINV_Init();
+	S_Init();
 	ZBA_Init();
 	ZDJ_Init();
 	ZPT_Init();
@@ -56,6 +58,7 @@ int main (void) {
 	// Main loop.
 	while (1) {
 		COMP_Task();
+		FPB_Task();
 		FD_Task();
 		LIGHTS_Task();
 		LOG_Task();

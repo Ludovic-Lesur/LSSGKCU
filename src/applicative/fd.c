@@ -57,7 +57,8 @@ void FD_Init(void) {
 void FD_Apply(void) {
 	// Play sound.
 	SOUND_Play(&(fd_ctx.fd_apply_sound));
-	// Send OpenRails shortcut.
+	// Send OpenRails shortcut (twice if previous state was released).
+	KEYBOARD_Send(OPENRAILS_FD_APPLY, OPENRAILS_PRESS_DURATION_MS_DEFAULT);
 	KEYBOARD_Send(OPENRAILS_FD_APPLY, OPENRAILS_PRESS_DURATION_MS_DEFAULT);
 	// Update state.
 	fd_ctx.fd_state = FD_STATE_APPLY;
@@ -103,7 +104,8 @@ void FD_Release(void) {
 	// Play sound.
 	SOUND_SetVolume(&(fd_ctx.fd_release_sound), 1.0); // No fade effect required.
 	SOUND_Play(&(fd_ctx.fd_release_sound));
-	// Send OpenRails shortcut.
+	// Send OpenRails shortcut (twice if previous state was applied).
+	KEYBOARD_Send(OPENRAILS_FD_RELEASE, OPENRAILS_PRESS_DURATION_MS_DEFAULT);
 	KEYBOARD_Send(OPENRAILS_FD_RELEASE, OPENRAILS_PRESS_DURATION_MS_DEFAULT);
 	// Update state.
 	fd_ctx.fd_state = FD_STATE_RELEASE;

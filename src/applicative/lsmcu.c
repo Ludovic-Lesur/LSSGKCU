@@ -16,6 +16,7 @@
 #include "log.h"
 #include "mp.h"
 #include "mpinv.h"
+#include "s.h"
 #include "serial.h"
 #include "stdio.h"
 #include "zba.h"
@@ -161,6 +162,15 @@ void LSMCU_Task(void) {
 			break;
 		case LSMCU_OUT_FD_RELEASE:
 			FD_Release();
+			break;
+		case LSMCU_OUT_S_HIGH_TONE:
+			S_HighTone();
+			break;
+		case LSMCU_OUT_S_NEUTRAL:
+			S_Neutral();
+			break;
+		case LSMCU_OUT_S_LOW_TONE:
+			S_LowTone();
 			break;
 		case LSMCU_OUT_ZFG_ON:
 			LIGHTS_ZfgOn();

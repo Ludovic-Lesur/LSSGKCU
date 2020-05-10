@@ -16,5 +16,6 @@ void FPB_Off(void);
 void FPB_Apply(void);
 void FPB_Neutral(void);
 void FPB_Release(void);
+void FPB_Task(void);
 
 #endif /* INC_APPLICATIVE_FPB_H_ */

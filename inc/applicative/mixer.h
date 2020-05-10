@@ -20,5 +20,6 @@
 #define MPINV_AUDIO_GAIN		1.0
 #define FPB_AUDIO_GAIN			1.0
 #define FD_AUDIO_GAIN			1.0
+#define S_AUDIO_GAIN			1.0
 
 #endif /* MIXER_H */
